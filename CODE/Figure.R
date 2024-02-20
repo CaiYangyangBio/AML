@@ -32,7 +32,6 @@ setwd("~/Desktop/22白血病/Runtime/2特征比较/")
 pdf("1C.pdf",width = 6,height = 5)
 g1
 dev.off()
-
 #==============================#
 
 
@@ -79,6 +78,34 @@ g1
 dev.off()
 #==============================#
 
+#==========Figure 1E==========#
+setwd("/Users/caiyangyang/Desktop/22白血病/Runtime/2特征比较/2.等位分组条形图/")
+data1<-read.table("MAP_Allele_support.txt",header = T,sep = "\t",stringsAsFactors = F,check.names = F,quote = "",fill = T)
+
+setwd("~/Desktop/22白血病/Runtime/0rawdata/DeepLC")
+data<-read.csv("Non-Canonical+Canonical(bind+nonbind)_pre.csv")
+data<-data[data$seq %in% data1$Epitopes,]
+
+index<-match(data$seq,data1$Epitopes,nomatch = 0)
+data$Type<-data1$Type[index]
+colnames(data)[4:5]<-c("Observed Retention Time (min)","DeepLC Retention Time (min)")
+
+g1<-ggscatterhist(data, x = "Observed Retention Time (min)", y = "DeepLC Retention Time (min)",
+                  color = "Type", size = 1,
+                  palette = c("Canonical"="#4DBBD5FF","Non-Canonical"="#E64B35FF"),
+                  add = "reg.line", alpha = 0.6,group = "Type",
+                  margin.params = list(fill ="Type"),
+                  add.params = list(color = "Type"), print = F,
+                  cor.coef = TRUE, # 添加相关系数
+                  cor.coeff.args = list(method = "pearson",label.x=3,label.y=115))
+
+setwd("~/Desktop/22白血病/Runtime/2特征比较/")
+pdf("1E.pdf",width = 6,height = 5,onefile = F)
+g1
+dev.off()
+#==============================#
+
+
 #==========Figure 1F==========#
 setwd("~/Desktop/22白血病/Runtime/0rawdata/1-ncORF/0-fasta")
 canonical<-read.table("uniprot.fa",header = F,sep = "\t",check.names = F,stringsAsFactors = F,fill = T,quote = "")
@@ -117,6 +144,42 @@ pdf("1F.pdf",width = 6,height = 5)
 g4
 dev.off()
 #==============================#
+
+
+#==========Figure 1G==========#
+setwd("/Users/caiyangyang/Desktop/22白血病/Runtime/2特征比较/2.等位分组条形图/")
+
+data<-read.table("MAP_Allele_support.txt",header = T,sep = "\t",stringsAsFactors = F,check.names = F,quote = "",fill = T)
+data<-data[,c("Samples","Epitopes","Type")]
+data<-data[!duplicated(data),]
+
+s_e_f<-data.frame(table(data[,c("Epitopes","Type")]))
+s_e_f<-s_e_f[which(s_e_f$Freq!=0),]
+ff<-data.frame(table(s_e_f[,2:3]))
+ff<-ff[which(ff$Freq.1!=0),]
+sum_c<-sum(ff$Freq.1[which(ff$Type=="Canonical")])
+sum_n<-sum(ff$Freq.1[which(ff$Type!="Canonical")])
+
+ff$Freq.1<-ifelse(ff$Type=="Canonical",ff$Freq.1/sum_c*100,ff$Freq.1/sum_n*100)
+
+g1<-ggplot(ff, aes(x = Freq, y = Freq.1,color= Type,shape = Type,group = Type))+
+  geom_point(size=2)+
+  geom_line(size=1)+
+  theme(panel.background = element_blank(),
+        axis.text = element_text(size =12,color="black"),
+        axis.title = element_text(size = 14,color="black"),
+        axis.line.x = element_line(size = 0.5),
+        axis.line.y = element_line(size =0.5),
+        legend.position = "top",
+        legend.text = element_text(size = 12,colour = "black"),
+        legend.title = element_blank())+
+  labs(x = "Occure in Samples",y="% of MAPs")+
+  scale_color_manual(values=c("Canonical"="#4DBBD5FF","Non-Canonical"="#E64B35FF"))
+
+setwd("~/Desktop/22白血病/Runtime/2特征比较/")
+pdf("1G.pdf",width = 6,height = 5)
+g1
+dev.off()
 
 
 
