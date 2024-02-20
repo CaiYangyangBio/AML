@@ -110,7 +110,7 @@ g2<-ggplot(ALL,aes(x = Samples,y = Freq,fill = fill))+
 
 
 
-setwd("~/Desktop/22白血病/Runtime/2特征比较/1.样本分组条形图")
+setwd("~/Desktop/22白血病/Runtime/2特征比较")
 write.table(MAP_freq,"MAP_support.txt",quote = F,sep = "\t",row.names = F)
 
 pdf("S1A.pdf",width = 12,height = 5)
@@ -155,7 +155,7 @@ data$Hydrophobicity_Fraction<-unlist(lapply(data$Epitopes,function(x){
   m<-length(pep)
   return(n/m)}))
 
-g1<-ggviolin(data, x="Type", y="Hydrophobicity_Fraction",palette = c("Canonical"="#4DBBD5FF","Non-Canonical"="#E64B35FF"),
+g2<-ggviolin(data, x="Type", y="Hydrophobicity_Fraction",palette = c("Canonical"="#4DBBD5FF","Non-Canonical"="#E64B35FF"),
              fill = "Type",short.panel.labs = F,add = "boxplot", add.params = list(fill="white"),
              outlier.shape = NA,ylab = "Hydrophobicity Fraction")+
   theme(axis.title.x = element_blank(),
@@ -169,10 +169,40 @@ g1<-ggviolin(data, x="Type", y="Hydrophobicity_Fraction",palette = c("Canonical"
   stat_compare_means(aes(group = Type),method="wilcox.test",
                      label = "p.signif",tip.length=0,label.x = 1.5)
 
-setwd("~/Desktop/22白血病/Runtime/2特征比较/7.疏水性")
+setwd("~/Desktop/22白血病/Runtime/2特征比较")
 pdf("S1C.pdf",width = 6,height = 5)
-g1
+g2
 dev.off()
 
 #==============================#
 
+#==========Figure S1D==========#
+setwd("/Users/caiyangyang/Desktop/22白血病/Runtime/2特征比较/2.等位分组条形图/")
+data<-read.table("MAP_Allele_support.txt",header = T,sep = "\t",stringsAsFactors = F,check.names = F,quote = "",fill = T)
+data$Length<-nchar(data$Epitopes)
+
+data<-data[,c("Epitopes","Length","Type")]
+data<-data[!duplicated(data),]
+data<-data.frame(table(data[,c("Length","Type")]))
+sum_c<-sum(data$Freq[which(data$Type=="Canonical")])
+sum_n<-sum(data$Freq[which(data$Type!="Canonical")])
+data$percentage<-ifelse(data$Type=="Canonical",round(data$Freq/sum_c*100,1),round(data$Freq/sum_n*100,1))
+
+g3<-ggplot(data, aes(x = Length, y = percentage,fill = Type))+
+  geom_bar(stat="identity",position="dodge")+
+  geom_text(aes(label=Freq),size=4,position = position_dodge(width = 0.9))+
+  theme(panel.background = element_blank(),
+        axis.text = element_text(size =12,color="black"),
+        axis.title = element_text(size = 14,color="black"),
+        axis.line.x = element_line(size = 0.5),
+        axis.line.y = element_line(size =0.5),
+        legend.position = "top",
+        legend.text = element_text(size = 12,colour = "black"),
+        legend.title = element_blank())+
+  labs(x = "Length of MAPs",y="% of MAPs")+
+  scale_fill_manual(values=c("Canonical"="#4DBBD5FF","Non-Canonical"="#E64B35FF"))
+
+setwd("~/Desktop/22白血病/Runtime/2特征比较")
+pdf("S1D.pdf",width = 6,height = 5)
+g3
+dev.off()
