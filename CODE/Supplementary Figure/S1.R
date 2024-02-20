@@ -1,7 +1,7 @@
 library(ggplot2)
 library(ggpubr)
 library(VennDiagram)
-#==========1.样本分组条形图==========#
+#==========Figure S1A==========#
 setwd("~/Desktop/22白血病/Runtime/1预处理/")
 data<-read.table("All_info.txt",header = T,sep = "\t",stringsAsFactors = F,check.names = F,quote = "",fill = T)
 sample<-unique(data$Samples)
@@ -140,4 +140,39 @@ venn<-venn.diagram(x=list("NetMHCpan" = unique(NetMHCpan$Epitopes[which(NetMHCpa
 pdf("NonCanonical_Venn.pdf")
 grid.draw(venn)
 dev.off()
+
+#==========Figure S1C==========#
+setwd("~/Desktop/22白血病/Runtime/2特征比较/2.等位分组条形图/")
+data<-read.table("MAP_Allele_support.txt",header = T,sep = "\t",stringsAsFactors = F,check.names = F,quote = "",fill = T)
+data<-data[,c("Epitopes","Type")]
+data<-data[!duplicated(data),]
+
+hydrophobicity_AA<-c("V","I","L","F","M","W","P","G","A")
+data$Hydrophobicity_Fraction<-unlist(lapply(data$Epitopes,function(x){
+  pep<-unlist(strsplit(x,""))
+  index<-match(pep,hydrophobicity_AA,nomatch = 0)
+  n<-length(which(pep %in% hydrophobicity_AA))
+  m<-length(pep)
+  return(n/m)}))
+
+g1<-ggviolin(data, x="Type", y="Hydrophobicity_Fraction",palette = c("Canonical"="#4DBBD5FF","Non-Canonical"="#E64B35FF"),
+             fill = "Type",short.panel.labs = F,add = "boxplot", add.params = list(fill="white"),
+             outlier.shape = NA,ylab = "Hydrophobicity Fraction")+
+  theme(axis.title.x = element_blank(),
+        axis.text = element_text(size =12,color="black"),
+        axis.title.y = element_text(size = 14,color="black"),
+        axis.line.x = element_line(size = 0.5),
+        axis.line.y = element_line(size =0.5),
+        legend.position = "top",
+        legend.text = element_text(size = 12,colour = "black"),
+        legend.title = element_blank())+
+  stat_compare_means(aes(group = Type),method="wilcox.test",
+                     label = "p.signif",tip.length=0,label.x = 1.5)
+
+setwd("~/Desktop/22白血病/Runtime/2特征比较/7.疏水性")
+pdf("S1C.pdf",width = 6,height = 5)
+g1
+dev.off()
+
+#==============================#
 
