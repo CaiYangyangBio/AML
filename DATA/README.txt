@@ -1,1 +1,1 @@
-
+For the identification of MAPs, three algorithms for predicting MHC-bound peptides were applied to filter experimentally identified peptides, including NetMHCpan (v.4.1), MHCflurry (v2.0) and MixMHCpred (v2.1). In terms of each sample, the binding affinities between patient-specific alleles and MS-detected peptides were predicted. Only peptides with a percentile rank ≤ 2% by at least two methods were defined as MAPs.
